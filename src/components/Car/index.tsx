@@ -1,5 +1,7 @@
 import React from 'react'
 
+import { TouchableOpacityProps } from 'react-native'
+
 import GasolineSvg from '../../assets/gasoline.svg'
 
 import * as S from './style'
@@ -14,13 +16,13 @@ type CarProps = {
   thumbnail: string
 }
 
-type Props = {
+type Props = TouchableOpacityProps & {
   data: CarProps
 }
 
-export function Car({ data }: Props) {
+export function Car({ data, ...rest }: Props) {
   return (
-    <S.Container>
+    <S.Container {...rest} activeOpacity={0.8}>
       <S.Flex>
         <S.Brand>{data.brand}</S.Brand>
         <S.Name>{data.name}</S.Name>
