@@ -1,4 +1,7 @@
 import React from 'react'
+
+import { useNavigation } from '@react-navigation/native'
+
 import { BackButton } from '../../components/BackButton'
 import { Item } from '../../components/Item'
 import { Slider } from '../../components/Slider'
@@ -14,14 +17,28 @@ import * as S from './style'
 import { Button } from '../../components/Button'
 
 export function Car() {
+  const navigation = useNavigation()
+
+  function handleBack() {
+    navigation.goBack()
+  }
+
+  function handleNavigation() {
+    navigation.navigate('scheduling')
+  }
+
   return (
     <S.Container>
       <S.Header>
-        <BackButton onPress={() => {}} />
+        <BackButton onPress={handleBack} />
       </S.Header>
 
       <S.Wrapper>
-        <Slider imagesUrl={['https://github.com/mayromyller.png']} />
+        <Slider
+          imagesUrl={[
+            'https://www.pngmart.com/files/10/Lamborghini-Huracan-Transparent-Background.png'
+          ]}
+        />
       </S.Wrapper>
 
       <S.Content>
@@ -54,7 +71,10 @@ export function Car() {
       </S.Content>
 
       <S.Footer>
-        <Button title="Confirmar" />
+        <Button
+          title="Escolher período do aluguel"
+          onPress={handleNavigation}
+        />
       </S.Footer>
     </S.Container>
   )
