@@ -5,15 +5,24 @@ import { TouchableOpacityProps } from 'react-native'
 import GasolineSvg from '../../assets/gasoline.svg'
 
 import * as S from './style'
+import IconType from '../../utils/carIcons'
 
-type CarProps = {
-  brand: string
+export type CarProps = {
+  id: string
   name: string
+  brand: string
+  about: string
+  fuel_type: string
+  thumbnail: string
+  photos: []
+  accessories: {
+    type: string
+    name: string
+  }[]
   rent: {
     period: string
     price: number
   }
-  thumbnail: string
 }
 
 type Props = TouchableOpacityProps & {
@@ -21,6 +30,8 @@ type Props = TouchableOpacityProps & {
 }
 
 export function Car({ data, ...rest }: Props) {
+  const IconMotor = IconType(data.fuel_type)
+
   return (
     <S.Container {...rest} activeOpacity={0.8}>
       <S.Flex>
@@ -34,7 +45,7 @@ export function Car({ data, ...rest }: Props) {
           </S.Wrapper>
 
           <S.Type>
-            <GasolineSvg />
+            <IconMotor />
           </S.Type>
         </S.Box>
       </S.Flex>
