@@ -1,31 +1,38 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { FlatList, StatusBar } from 'react-native'
 import { RFValue } from 'react-native-responsive-fontsize'
 
 import { useNavigation } from '@react-navigation/native'
 
-import { Car } from '../../components/Car'
+import { Car, CarProps } from '../../components/Car'
 import Logo from '../../assets/logo.svg'
+
+import api from '../../services/api'
 
 import * as S from './style'
 
 export function Home() {
-  const car = {
-    brand: 'Audi',
-    name: 'RS Coupé',
-    rent: {
-      period: 'Ao dia',
-      price: 120
-    },
-    thumbnail:
-      'https://www.pngmart.com/files/10/Lamborghini-Huracan-Transparent-Background.png'
-  }
+  const [car, setCar] = useState<CarProps[]>([])
 
   const navigation = useNavigation()
 
-  function handleNavigation() {
-    navigation.navigate('car')
+  function handleNavigation(car: CarProps) {
+    navigation.navigate('car', { car })
   }
+
+  async function getCar() {
+    try {
+      const response = await api.get('/cars')
+
+      setCar(response.data)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  useEffect(() => {
+    getCar()
+  }, [])
 
   return (
     <S.Container>
@@ -41,12 +48,15 @@ export function Home() {
       </S.Header>
 
       <FlatList
-        data={[1, 2, 3]}
+        data={car}
         contentContainerStyle={{
           paddingHorizontal: 24
         }}
+        keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
-        renderItem={({ item }) => <Car data={car} onPress={handleNavigation} />}
+        renderItem={({ item }) => (
+          <Car data={item} onPress={() => handleNavigation(item)} />
+        )}
         style={{
           marginTop: 16
         }}
