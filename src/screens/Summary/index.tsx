@@ -1,68 +1,118 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 
-import { useNavigation } from '@react-navigation/native'
+import { StatusBar, Alert } from 'react-native'
+
+import { useNavigation, useRoute } from '@react-navigation/native'
 
 import { Feather } from '@expo/vector-icons'
 import { useTheme } from 'styled-components'
 import { RFValue } from 'react-native-responsive-fontsize'
+import { format, addDays } from 'date-fns'
+
+import { SummaryNavigationProps } from '../../@types/navigation'
 
 import { BackButton } from '../../components/BackButton'
 import { Button } from '../../components/Button'
 import { Slider } from '../../components/Slider'
 import { Item } from '../../components/Item'
 
-import SpeedSVG from '../../assets/speed.svg'
-import AccelerationSVG from '../../assets/acceleration.svg'
-import ForceSVG from '../../assets/force.svg'
-import GasolineSVG from '../../assets/gasoline.svg'
-import ExchangeSVG from '../../assets/exchange.svg'
-import PeopleSVG from '../../assets/people.svg'
+import IconType from '../../utils/carIcons'
+import api from '../../services/api'
 
 import * as S from './style'
 
+type RentalPeriodProps = {
+  start: string
+  end: string
+}
+
 export function Summary() {
+  const [rentalPeriod, setRentalPeriod] = useState<RentalPeriodProps>(
+    {} as RentalPeriodProps
+  )
+  const [loading, setLoading] = useState(false)
+
   const { colors } = useTheme()
 
   const navigation = useNavigation()
+  const route = useRoute()
+  const data = route.params as SummaryNavigationProps
 
   function handleBack() {
     navigation.goBack()
   }
 
-  function handleNavigation() {
-    navigation.navigate('done')
+  async function handleNavigation() {
+    setLoading(true)
+
+    const response = await api.get(`/schedules_bycars/${data.car.id}`)
+
+    const unavailable_dates = [
+      ...response.data.unavailable_dates,
+      ...data.dates
+    ]
+
+    await api.post('schedules_byuser', {
+      user_id: 1,
+      car: data.car
+    })
+
+    await api
+      .put(`/schedules_bycars/${data.car.id}`, {
+        id: data.car.id,
+        unavailable_dates
+      })
+      .then(() => navigation.navigate('done'))
+      .catch(() =>
+        Alert.alert('Aluguel', 'Não foi possível confirmar o agendamento')
+      )
+      .finally(() => setLoading(false))
   }
+
+  const totalPriceRent = Number(data.dates.length) * data.car.rent.price
+
+  useEffect(() => {
+    setRentalPeriod({
+      start: format(addDays(new Date(data.dates[0]), 1), 'dd/MM/yyyy'),
+      end: format(
+        addDays(new Date(data.dates[data.dates.length - 1]), 1),
+        'dd/MM/yyyy'
+      )
+    })
+  }, [])
 
   return (
     <S.Container>
+      <StatusBar
+        barStyle="dark-content"
+        translucent
+        backgroundColor="transparent"
+      />
       <S.Header>
         <BackButton onPress={handleBack} />
       </S.Header>
 
       <S.Wrapper>
-        <Slider imagesUrl={['https://github.com/mayromyller.png']} />
+        <Slider imagesUrl={data.car.photos} />
       </S.Wrapper>
 
       <S.Content>
         <S.Flex>
           <S.Box>
-            <S.Brand>Lamborghini</S.Brand>
-            <S.Name>Huracan</S.Name>
+            <S.Brand>{data.car.brand}</S.Brand>
+            <S.Name>{data.car.name}</S.Name>
           </S.Box>
 
           <S.Box>
-            <S.Text>Ao dia</S.Text>
-            <S.Heading>R$ 580</S.Heading>
+            <S.Text>{data.car.rent.period}</S.Text>
+            <S.Heading>R$ {data.car.rent.price}</S.Heading>
           </S.Box>
         </S.Flex>
 
         <S.Grid>
-          <Item name="380km/h" icon={SpeedSVG} />
-          <Item name="3.2s" icon={AccelerationSVG} />
-          <Item name="800 HP" icon={ForceSVG} />
-          <Item name="Gasolina" icon={GasolineSVG} />
-          <Item name="Auto" icon={ExchangeSVG} />
-          <Item name="2 pessoas" icon={PeopleSVG} />
+          {data.car.accessories.map((item) => (
+            <Item key={item.type} name={item.name} icon={IconType(item.type)} />
+          ))}
         </S.Grid>
 
         <S.RentalPeriod>
@@ -72,7 +122,7 @@ export function Summary() {
 
           <S.DateInfo>
             <S.Info>DE</S.Info>
-            <S.Date>22/06/2022</S.Date>
+            <S.Date>{rentalPeriod.start}</S.Date>
           </S.DateInfo>
 
           <Feather
@@ -83,17 +133,19 @@ export function Summary() {
 
           <S.DateInfo>
             <S.Info>ATÉ</S.Info>
-            <S.Date>22/06/2022</S.Date>
+            <S.Date>{rentalPeriod.end}</S.Date>
           </S.DateInfo>
         </S.RentalPeriod>
 
         <S.Flex>
           <S.DateInfo>
             <S.Info>Total</S.Info>
-            <S.Label>R$ 580 x 3 diárias</S.Label>
+            <S.Label>
+              R$ {data.car.rent.price} x {data.dates.length} diárias
+            </S.Label>
           </S.DateInfo>
 
-          <S.Price>R$ 2.900</S.Price>
+          <S.Price>R$ {totalPriceRent}</S.Price>
         </S.Flex>
       </S.Content>
 
@@ -102,6 +154,7 @@ export function Summary() {
           title="Alugar Agora"
           color={colors.success}
           onPress={handleNavigation}
+          loading={loading}
         />
       </S.Footer>
     </S.Container>
