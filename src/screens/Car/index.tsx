@@ -25,7 +25,8 @@ export function Car() {
   }
 
   function handleNavigation() {
-    navigation.navigate('scheduling')
+    const { car } = data
+    navigation.navigate('scheduling', { car })
   }
 
   const {
@@ -51,11 +52,7 @@ export function Car() {
       </S.Header>
 
       <S.Wrapper>
-        <Slider
-          imagesUrl={[
-            'https://www.pngmart.com/files/10/Lamborghini-Huracan-Transparent-Background.png'
-          ]}
-        />
+        <Slider imagesUrl={photos} />
       </S.Wrapper>
 
       <S.Content>
