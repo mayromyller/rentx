@@ -4,6 +4,7 @@ import { useWindowDimensions, StatusBar } from 'react-native'
 import { useTheme } from 'styled-components'
 
 import { Button } from '../../components/Button'
+import { useNavigation } from '@react-navigation/native'
 
 import LogoSVG from '../../assets/logo_background_gray.svg'
 import DoneSVG from '../../assets/done.svg'
@@ -13,6 +14,7 @@ import * as S from './style'
 export function Done() {
   const { width } = useWindowDimensions()
   const { colors } = useTheme()
+  const navigation = useNavigation()
 
   return (
     <S.Container>
@@ -35,7 +37,11 @@ export function Done() {
         </S.Paragraph>
 
         <S.Box>
-          <Button title="Ok" color={colors.shape_dark} />
+          <Button
+            title="Ok"
+            color={colors.shape_dark}
+            onPress={() => navigation.navigate('home')}
+          />
         </S.Box>
       </S.Content>
     </S.Container>
