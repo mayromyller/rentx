@@ -1,4 +1,5 @@
-import React from 'react'
+import React, { useRef, useState } from 'react'
+import { FlatList, ViewToken } from 'react-native'
 
 import * as S from './style'
 
@@ -6,24 +7,45 @@ type Props = {
   imagesUrl: string[]
 }
 
+type SlideProps = {
+  viewableItems: ViewToken[]
+  changed: ViewToken[]
+}
+
 export function Slider({ imagesUrl }: Props) {
+  const [imageIndex, setImageIndex] = useState(0)
+
+  const indexChanged = useRef((info: SlideProps) => {
+    const index = info.viewableItems[0].index!
+    setImageIndex(index)
+  })
+
   return (
     <S.Container>
       <S.Indexes>
-        <S.Index active={true} />
-        <S.Index active={false} />
-        <S.Index active={false} />
-        <S.Index active={false} />
+        {imagesUrl.map((_, index) => (
+          <S.Index key={String(index)} active={index === imageIndex} />
+        ))}
       </S.Indexes>
 
-      <S.Wrapper>
-        <S.Image
-          source={{
-            uri: 'https://www.pngmart.com/files/10/Lamborghini-Huracan-Transparent-Background.png'
-          }}
-          resizeMode="contain"
-        />
-      </S.Wrapper>
+      <FlatList
+        data={imagesUrl}
+        keyExtractor={(key) => key}
+        renderItem={({ item }) => (
+          <S.Wrapper>
+            <S.Image
+              source={{
+                uri: item
+              }}
+              resizeMode="contain"
+            />
+          </S.Wrapper>
+        )}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        pagingEnabled
+        onViewableItemsChanged={indexChanged.current}
+      />
     </S.Container>
   )
 }
