@@ -21,3 +21,15 @@ export const Text = styled.Text`
   font-family: ${({ theme }) => theme.fonts.interRegular};
   color: ${({ theme }) => theme.colors.text};
 `
+
+export const FloatingButton = styled.TouchableOpacity`
+  width: 60px;
+  height: 60px;
+  border-radius: 30px;
+  background-color: ${({ theme }) => theme.colors.main};
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  bottom: 22px;
+  right: 24px;
+`

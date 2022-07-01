@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { FlatList, StatusBar } from 'react-native'
 import { RFValue } from 'react-native-responsive-fontsize'
+import { Ionicons } from '@expo/vector-icons'
 
 import { useNavigation } from '@react-navigation/native'
 
@@ -18,6 +19,10 @@ export function Home() {
 
   function handleNavigation(car: CarProps) {
     navigation.navigate('car', { car })
+  }
+
+  function handleNavigateToMyCars() {
+    navigation.navigate('mycars')
   }
 
   async function getCar() {
@@ -44,7 +49,9 @@ export function Home() {
       <S.Header>
         <Logo width={RFValue(108)} height={RFValue(12)} />
 
-        <S.Text>Total de 12 carros</S.Text>
+        <S.Text>
+          Total de {car.length} {car.length > 1 ? 'carros' : 'carro'}
+        </S.Text>
       </S.Header>
 
       <FlatList
@@ -61,6 +68,9 @@ export function Home() {
           marginTop: 16
         }}
       />
+      <S.FloatingButton onPress={handleNavigateToMyCars}>
+        <Ionicons name="car-sport" size={32} color="white" />
+      </S.FloatingButton>
     </S.Container>
   )
 }
